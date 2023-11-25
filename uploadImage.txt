@@ -1,0 +1,45 @@
+/* upload image wih cloudinary */
+  const uploadProfileImg = async (formData: FormData) => {
+    try {
+      const res = await axios.post(
+        "https://api.cloudinary.com/v1_1/dsrvia1wu/image/upload",
+        formData
+      );
+      const { url, asset_id, etag } = res.data;
+      return { url, asset_id, etag };
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const upLoadImage = async (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target && e.target.files && e.target.files.length > 0) {
+      setLoadingPage(true);
+      /* set image virtual */
+      const file = e.target.files[0];
+      const imageUrl = URL.createObjectURL(file);
+      // setImageVirtual(imageUrl);
+
+      /* set image real */
+      const formData = new FormData();
+      formData.append("file", e.target.files[0]);
+      formData.append("upload_preset", "nguyenGMO");
+      const image = await uploadProfileImg(formData);
+
+      /* etag : check image upload trùng nếu cần */
+      setImageURL((prevImagePaths) => [
+        ...prevImagePaths,
+        {
+          url: image?.url,
+          id: image?.asset_id,
+          etag: image?.etag,
+          loading: false,
+        },
+      ]);
+      setLoadingPage(false);
+    }
+
+    /* clear value current file */
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
